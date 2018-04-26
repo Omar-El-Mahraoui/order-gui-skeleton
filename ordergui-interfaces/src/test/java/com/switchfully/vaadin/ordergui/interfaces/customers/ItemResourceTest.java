@@ -1,5 +1,7 @@
 package com.switchfully.vaadin.ordergui.interfaces.customers;
 
+import com.switchfully.vaadin.ordergui.interfaces.items.Item;
+import com.switchfully.vaadin.ordergui.interfaces.items.ItemResource;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -8,12 +10,8 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.Assert.*;
-import static org.mockito.AdditionalMatchers.eq;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
