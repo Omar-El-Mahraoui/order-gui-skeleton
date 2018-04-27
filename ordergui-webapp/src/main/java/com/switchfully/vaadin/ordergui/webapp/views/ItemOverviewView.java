@@ -11,6 +11,10 @@ import com.vaadin.ui.*;
 import com.vaadin.ui.themes.ValoTheme;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 // copied and adapted code from https://github.com/stevendecock/vaadinbooking
 // and switchfully repositories
 // and book of vaadin
@@ -36,24 +40,37 @@ public class ItemOverviewView extends com.vaadin.ui.CustomComponent implements V
         mainLayout = new VerticalLayout();
         mainLayout.setMargin(true);
         mainLayout.setSizeFull();
+        mainLayout.setDefaultComponentAlignment(Alignment.MIDDLE_CENTER);
         setCompositionRoot(mainLayout);
-
-        //addNavigationBar();
-        addHeader();
     }
 
     private void init() {
+        mainLayout.removeAllComponents();
+        addNavigationBar();
+        addHeader();
         renderItems();
     }
 
 
-    /*private void addNavigationBar() {
+    private void addNavigationBar() {
         HorizontalLayout navigationBar = new HorizontalLayout();
-        Button buttonItems = new Button("Items"
-                , event -> getUI().getNavigator().navigateTo(OrderGUI.VIEW_ITEM_OVERVIEW));
-        navigationBar.addComponents(buttonItems);
+        ComboBox comboBoxItems = new ComboBox("");
+        comboBoxItems.setNullSelectionAllowed(false);
+
+        Map<String, String> navigationOptions = new HashMap<>();
+        navigationOptions.put("Create Item", OrderGUI.CREATE_ITEM);
+
+        comboBoxItems.addItems("Create Item");
+        //http://zetcode.com/vaadin/combobox/
+        comboBoxItems.addValueChangeListener(event -> {
+            String item = event.getProperty().getValue().toString();
+            getUI().getNavigator().navigateTo(navigationOptions.get(item));
+        });
+
+        navigationBar.addComponents(comboBoxItems);
         mainLayout.addComponent(navigationBar);
-    }*/
+    }
+
     private void addHeader() {
         header = new HorizontalLayout();
         header.setSizeFull();
@@ -96,7 +113,10 @@ public class ItemOverviewView extends com.vaadin.ui.CustomComponent implements V
 //                        mainLayout.addComponent(
 //                                new HorizontalLayout(
 //                                        new Label("--> " + item.name + " €" + item.price))));
-        container = new BeanItemContainer<>(Item.class, itemResource.getItems());
+        container = new BeanItemContainer<>(Item.class
+                , itemResource.getItems().stream()
+                                            .sorted((item1,item2)->item1.getName().compareToIgnoreCase(item2.getName()))
+                                            .collect(Collectors.toList()));
         grid.setColumns("name", "description", "price", "amountOfStock");
 
         grid.setContainerDataSource(container);

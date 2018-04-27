@@ -13,6 +13,9 @@ import com.vaadin.ui.*;
 import com.vaadin.ui.themes.ValoTheme;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.HashMap;
+import java.util.Map;
+
 // copied and adapted code from https://github.com/stevendecock/vaadinbooking
 // and switchfully repositories
 // and book of vaadin
@@ -43,6 +46,7 @@ public class ItemCreateView extends CustomComponent implements View {
         mainLayout = new VerticalLayout();
         mainLayout.removeAllComponents();
         mainLayout.setMargin(true);
+        mainLayout.setDefaultComponentAlignment(Alignment.MIDDLE_CENTER);
         setCompositionRoot(mainLayout);
         itemBeanFieldGroup = BeanFieldGroup.bindFieldsBuffered(itemToCreate, this);
     }
@@ -50,11 +54,31 @@ public class ItemCreateView extends CustomComponent implements View {
     private void init() {
         mainLayout.removeAllComponents();
 
+        addNavigationBar();
         addHeader();
         addNameForm();
         addDescriptionForm();
         addPriceAndAmountOfStockForm();
         addCreateAndCancelButtons();
+    }
+
+    private void addNavigationBar() {
+        HorizontalLayout navigationBar = new HorizontalLayout();
+        ComboBox comboBoxItems = new ComboBox("");
+        comboBoxItems.setNullSelectionAllowed(false);
+
+        Map<String, String> navigationOptions = new HashMap<>();
+        navigationOptions.put("Search item", OrderGUI.VIEW_ITEM_OVERVIEW);
+
+        comboBoxItems.addItems("Search item");
+        //http://zetcode.com/vaadin/combobox/
+        comboBoxItems.addValueChangeListener(event -> {
+            String item = event.getProperty().getValue().toString();
+            getUI().getNavigator().navigateTo(navigationOptions.get(item));
+        });
+
+        navigationBar.addComponents(comboBoxItems);
+        mainLayout.addComponent(navigationBar);
     }
 
     private void addHeader() {
@@ -89,14 +113,7 @@ public class ItemCreateView extends CustomComponent implements View {
 
     private Component addPriceForm() {
         priceLayout = new VerticalLayout();
-//        labelPrice = new Label("Price");
-//
-//        priceAmountLayout = new HorizontalLayout();
-//        labelEuroSymbol = new Label();
-//        labelEuroSymbol.setIcon(FontAwesome.EUR);
-//        price.setNullRepresentation("");
-//        price.setRequired(true);
-//        priceAmountLayout.addComponents(labelEuroSymbol, price);
+
         price.setNullRepresentation("");
         price.setRequired(true);
         price.addValidator(new FloatRangeValidator("Price cannot be negative.", 0.00000000001f
