@@ -33,7 +33,10 @@ public class ItemOverviewView extends com.vaadin.ui.CustomComponent implements V
         //addNavigationBar();
         addHeader();
         renderItems();
+        addEditButtons();
     }
+
+
 
     /*private void addNavigationBar() {
         HorizontalLayout navigationBar = new HorizontalLayout();
@@ -42,7 +45,6 @@ public class ItemOverviewView extends com.vaadin.ui.CustomComponent implements V
         navigationBar.addComponents(buttonItems);
         mainLayout.addComponent(navigationBar);
     }*/
-
     private void addHeader() {
         HorizontalLayout header = new HorizontalLayout();
         header.setSizeFull();
@@ -82,10 +84,18 @@ public class ItemOverviewView extends com.vaadin.ui.CustomComponent implements V
 //                        mainLayout.addComponent(
 //                                new HorizontalLayout(
 //                                        new Label("--> " + item.name + " €" + item.price))));
+        HorizontalLayout horizontalLayoutItems = new HorizontalLayout();
         container = new BeanItemContainer<>(Item.class, itemResource.getItems());
         grid.setColumns("name", "description", "price", "amountOfStock");
         grid.setContainerDataSource(container);
-        mainLayout.addComponent(grid);
+        grid.setSizeUndefined();
+        Button buttonEditItem = new Button("Edit");
+        buttonEditItem.setSizeUndefined();
+        horizontalLayoutItems.addComponents(grid, buttonEditItem);
+        mainLayout.addComponent(horizontalLayoutItems);
+    }
+
+    private void addEditButtons() {
     }
 
     @Override
