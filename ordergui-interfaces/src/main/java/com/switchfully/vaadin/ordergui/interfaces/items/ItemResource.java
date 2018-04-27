@@ -22,5 +22,9 @@ public class ItemResource {
         return Arrays.asList(items);
     }
 
+    public void createItem(Item item) {
+        restTemplate.postForObject("http://localhost:9000/items", item, Item.class);
+    }
+
 
 }

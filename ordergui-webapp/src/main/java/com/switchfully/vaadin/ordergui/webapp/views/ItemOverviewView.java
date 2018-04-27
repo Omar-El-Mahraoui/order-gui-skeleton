@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 // copied and adapted code from https://github.com/stevendecock/vaadinbooking
 // and switchfully repositories
+// and book of vaadin
 
 public class ItemOverviewView extends com.vaadin.ui.CustomComponent implements View{
 
@@ -20,6 +21,12 @@ public class ItemOverviewView extends com.vaadin.ui.CustomComponent implements V
     private VerticalLayout mainLayout;
     private ItemResource itemResource;
     private BeanItemContainer<Item> container;
+    private HorizontalLayout header;
+    private Label labelItems;
+    private TextField filterField;
+    private Button buttonFilter;
+    private Button buttonNewItem;
+    private Button buttonUpdateItem;
 
     @Autowired
     public ItemOverviewView(ItemResource itemResource) {
@@ -30,12 +37,14 @@ public class ItemOverviewView extends com.vaadin.ui.CustomComponent implements V
         mainLayout.setMargin(true);
         mainLayout.setSizeFull();
         setCompositionRoot(mainLayout);
+
         //addNavigationBar();
         addHeader();
-        renderItems();
-        addEditButtons();
     }
 
+    private void init() {
+        renderItems();
+    }
 
 
     /*private void addNavigationBar() {
@@ -46,13 +55,14 @@ public class ItemOverviewView extends com.vaadin.ui.CustomComponent implements V
         mainLayout.addComponent(navigationBar);
     }*/
     private void addHeader() {
-        HorizontalLayout header = new HorizontalLayout();
+        header = new HorizontalLayout();
         header.setSizeFull();
         header.setMargin(true);
 
-        Label labelItems = new Label("ITEMS:");
+        labelItems = new Label("ITEMS:");
+        labelItems.setStyleName(ValoTheme.LABEL_H1);
 
-        TextField filterField = new TextField();
+        filterField = new TextField();
         filterField.setInputPrompt("Filter by name");
         filterField.setSizeFull();
         filterField.addTextChangeListener(event -> {
@@ -62,19 +72,21 @@ public class ItemOverviewView extends com.vaadin.ui.CustomComponent implements V
 
         });
 
-        Button buttonFilter = new Button("Filter");
+        buttonFilter = new Button("Filter");
         buttonFilter.setStyleName(ValoTheme.BUTTON_PRIMARY);
         buttonFilter.addClickListener(event -> {
             container.removeAllContainerFilters();
             container.addContainerFilter("name", filterField.getValue(), true, false);
         });
 
-        Button buttonNewItem = new Button("New Item");
+        buttonNewItem = new Button("New Item");
         buttonNewItem.setStyleName(ValoTheme.BUTTON_FRIENDLY);
         buttonNewItem.addClickListener(event -> getUI().getNavigator().navigateTo(OrderGUI.CREATE_ITEM));
 
+        buttonUpdateItem = new Button("Update Item");
+        buttonUpdateItem.setStyleName(ValoTheme.BUTTON_FRIENDLY);
 
-        header.addComponents(labelItems, filterField, buttonFilter, buttonNewItem);
+        header.addComponents(labelItems, filterField, buttonFilter, buttonNewItem, buttonUpdateItem);
         mainLayout.addComponent(header);
     }
 
@@ -84,22 +96,21 @@ public class ItemOverviewView extends com.vaadin.ui.CustomComponent implements V
 //                        mainLayout.addComponent(
 //                                new HorizontalLayout(
 //                                        new Label("--> " + item.name + " €" + item.price))));
-        HorizontalLayout horizontalLayoutItems = new HorizontalLayout();
         container = new BeanItemContainer<>(Item.class, itemResource.getItems());
         grid.setColumns("name", "description", "price", "amountOfStock");
+
         grid.setContainerDataSource(container);
         grid.setSizeUndefined();
-        Button buttonEditItem = new Button("Edit");
-        buttonEditItem.setSizeUndefined();
-        horizontalLayoutItems.addComponents(grid, buttonEditItem);
-        mainLayout.addComponent(horizontalLayoutItems);
+        grid.setSizeFull();
+        mainLayout.addComponent(grid);
     }
 
-    private void addEditButtons() {
+    private void addEditButton() {
+
     }
 
     @Override
     public void enter(ViewChangeListener.ViewChangeEvent event) {
-
+        init();
     }
 }
