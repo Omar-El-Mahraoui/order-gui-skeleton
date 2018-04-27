@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 // copied and adapted code from https://github.com/stevendecock/vaadinbooking
 // and switchfully repositories
@@ -170,10 +171,12 @@ public class ItemCreateView extends CustomComponent implements View {
             itemBeanFieldGroup.commit();
             itemResource.createItem(itemToCreate);
         } catch (FieldGroup.CommitException e) {
-            Notification.show(
-                    String.format("Cannot create item: \n%s"
-                            ,e.getInvalidFields().values().iterator().next().getMessage())
-            ,Notification.Type.ERROR_MESSAGE);
+            // https://coderwall.com/p/im4lja/joining-objects-into-a-string-with-java-8-stream-api
+            Notification.show("Cannot create item: \n- "
+                            + e.getInvalidFields().values().stream()
+                                .map(e1 -> e1.getMessage())
+                                .collect(Collectors.joining("\n- "))
+                            , Notification.Type.ERROR_MESSAGE);
         }
     }
 
