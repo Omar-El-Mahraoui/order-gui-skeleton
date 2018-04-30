@@ -3,10 +3,12 @@ package com.switchfully.vaadin.ordergui.webapp.views;
 import com.switchfully.vaadin.ordergui.interfaces.items.Item;
 import com.switchfully.vaadin.ordergui.interfaces.items.ItemResource;
 import com.switchfully.vaadin.ordergui.webapp.OrderGUI;
+import com.switchfully.vaadin.ordergui.webapp.views.validators.TextFieldAMountOfStockValidator;
+import com.switchfully.vaadin.ordergui.webapp.views.validators.TextFieldDescriptionValidator;
+import com.switchfully.vaadin.ordergui.webapp.views.validators.TextFieldNameValidator;
+import com.switchfully.vaadin.ordergui.webapp.views.validators.TextFieldPriceValidator;
 import com.vaadin.data.fieldgroup.BeanFieldGroup;
 import com.vaadin.data.fieldgroup.FieldGroup;
-import com.vaadin.data.validator.FloatRangeValidator;
-import com.vaadin.data.validator.IntegerRangeValidator;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener;
 import com.vaadin.ui.*;
@@ -70,8 +72,10 @@ public class ItemCreateView extends CustomComponent implements View {
 
         Map<String, String> navigationOptions = new HashMap<>();
         navigationOptions.put("Search item", OrderGUI.VIEW_ITEM_OVERVIEW);
+        navigationOptions.put("Update item", OrderGUI.UPDATE_ITEM);
 
         comboBoxItems.addItems("Search item");
+        comboBoxItems.addItems("Update item");
         //http://zetcode.com/vaadin/combobox/
         comboBoxItems.addValueChangeListener(event -> {
             String item = event.getProperty().getValue().toString();
@@ -93,6 +97,7 @@ public class ItemCreateView extends CustomComponent implements View {
         name.setSizeFull();
         name.setRequired(true);
         name.setNullRepresentation("");
+        name.addValidator(new TextFieldNameValidator());
         mainLayout.addComponents(name);
     }
 
@@ -101,6 +106,7 @@ public class ItemCreateView extends CustomComponent implements View {
         description.setSizeFull();
         description.setRequired(true);
         description.setNullRepresentation("");
+        description.addValidator(new TextFieldDescriptionValidator());
         mainLayout.addComponents(description);
     }
 
@@ -117,8 +123,7 @@ public class ItemCreateView extends CustomComponent implements View {
 
         price.setNullRepresentation("");
         price.setRequired(true);
-        price.addValidator(new FloatRangeValidator("Price cannot be negative.", 0.00000000001f
-                , Float.MAX_VALUE));
+        price.addValidator(new TextFieldPriceValidator());
 
         priceLayout.addComponents(price);
         return priceLayout;
@@ -128,8 +133,8 @@ public class ItemCreateView extends CustomComponent implements View {
         amountOfStockLayout = new VerticalLayout();
         amountOfStock.setNullRepresentation("");
         amountOfStock.setRequired(true);
-        amountOfStock.addValidator(new IntegerRangeValidator("Amount of stock cannot be negative"
-                                    , 1, Integer.MAX_VALUE));
+        amountOfStock.setImmediate(true);
+        amountOfStock.addValidator(new TextFieldAMountOfStockValidator());
         amountOfStockLayout.addComponents(amountOfStock);
         return amountOfStockLayout;
     }
@@ -141,23 +146,16 @@ public class ItemCreateView extends CustomComponent implements View {
 
         buttonCreate = new Button("Create");
         buttonCreate.setStyleName(ValoTheme.BUTTON_PRIMARY);
-        buttonCreate.addClickListener(event -> {
-            save();
+        buttonCreate.addClickListener(event -> save());
+
+        buttonCancel = new Button("Cancel");
+        buttonCancel.addClickListener(event -> {
             getUI().getNavigator().navigateTo(OrderGUI.VIEW_ITEM_OVERVIEW);
             name.clear();
             description.clear();
             price.clear();
             amountOfStock.clear();
         });
-
-        buttonCancel = new Button("Cancel");
-        buttonCancel.addClickListener(event -> {
-                    getUI().getNavigator().navigateTo(OrderGUI.VIEW_ITEM_OVERVIEW);
-                    name.clear();
-                    description.clear();
-                    price.clear();
-                    amountOfStock.clear();
-                });
 
 
         horizontalLayoutCreateAndCancelButtons.addComponents(buttonCreate, buttonCancel);
@@ -174,23 +172,11 @@ public class ItemCreateView extends CustomComponent implements View {
             // https://coderwall.com/p/im4lja/joining-objects-into-a-string-with-java-8-stream-api
             Notification.show("Cannot create item: \n- "
                             + e.getInvalidFields().values().stream()
-                                .map(e1 -> e1.getMessage())
-                                .collect(Collectors.joining("\n- "))
-                            , Notification.Type.ERROR_MESSAGE);
+                            .map(e1 -> e1.getMessage())
+                            .collect(Collectors.joining("\n- "))
+                    , Notification.Type.WARNING_MESSAGE);
         }
     }
-
-//    //https://github.com/stevendecock/vaadinbooking
-//    private void showNotificationFor(FieldGroup.CommitException exception) {
-//        Notification notification = new Notification("Validation errors",
-//                "<br/>Cannot save this item. "
-//                        + ((exception.getCause() != null && exception.getCause().getMessage() != null)
-//                        ? exception.getCause().getMessage() : ""),
-//                Notification.Type.WARNING_MESSAGE, true);
-//
-//        notification.setDelayMsec(-1);
-//        notification.show(Page.getCurrent());
-//    }
 
     @Override
     public void enter(ViewChangeListener.ViewChangeEvent event) {

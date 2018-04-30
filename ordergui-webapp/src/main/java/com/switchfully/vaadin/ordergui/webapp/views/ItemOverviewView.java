@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 // and switchfully repositories
 // and book of vaadin
 
-public class ItemOverviewView extends com.vaadin.ui.CustomComponent implements View{
+public class ItemOverviewView extends com.vaadin.ui.CustomComponent implements View {
 
     private Grid grid;
     private VerticalLayout mainLayout;
@@ -28,9 +28,10 @@ public class ItemOverviewView extends com.vaadin.ui.CustomComponent implements V
     private HorizontalLayout header;
     private Label labelItems;
     private TextField filterField;
-    private Button buttonFilter;
+    private Button buttonClearFilter;
     private Button buttonNewItem;
     private Button buttonUpdateItem;
+    private Item itemSelected;
 
     @Autowired
     public ItemOverviewView(ItemResource itemResource) {
@@ -59,8 +60,10 @@ public class ItemOverviewView extends com.vaadin.ui.CustomComponent implements V
 
         Map<String, String> navigationOptions = new HashMap<>();
         navigationOptions.put("Create Item", OrderGUI.CREATE_ITEM);
+        navigationOptions.put("Update Item", OrderGUI.UPDATE_ITEM);
 
         comboBoxItems.addItems("Create Item");
+        comboBoxItems.addItems("Update Item");
         //http://zetcode.com/vaadin/combobox/
         comboBoxItems.addValueChangeListener(event -> {
             String item = event.getProperty().getValue().toString();
@@ -89,11 +92,11 @@ public class ItemOverviewView extends com.vaadin.ui.CustomComponent implements V
 
         });
 
-        buttonFilter = new Button("Filter");
-        buttonFilter.setStyleName(ValoTheme.BUTTON_PRIMARY);
-        buttonFilter.addClickListener(event -> {
+        buttonClearFilter = new Button("X");
+        buttonClearFilter.setStyleName(ValoTheme.BUTTON_PRIMARY);
+        buttonClearFilter.addClickListener(event -> {
             container.removeAllContainerFilters();
-            container.addContainerFilter("name", filterField.getValue(), true, false);
+            filterField.clear();
         });
 
         buttonNewItem = new Button("New Item");
@@ -102,31 +105,32 @@ public class ItemOverviewView extends com.vaadin.ui.CustomComponent implements V
 
         buttonUpdateItem = new Button("Update Item");
         buttonUpdateItem.setStyleName(ValoTheme.BUTTON_FRIENDLY);
+        buttonUpdateItem.addClickListener(event -> {
+            if (itemSelected != null) {
+                getUI().getNavigator().navigateTo(OrderGUI.UPDATE_ITEM + "/" + itemSelected.getId());
+            }
+        });
 
-        header.addComponents(labelItems, filterField, buttonFilter, buttonNewItem, buttonUpdateItem);
+        header.addComponents(labelItems, filterField, buttonClearFilter, buttonNewItem, buttonUpdateItem);
         mainLayout.addComponent(header);
     }
 
     private void renderItems() {
-//        itemResource.getItems()
-//                .forEach(item ->
-//                        mainLayout.addComponent(
-//                                new HorizontalLayout(
-//                                        new Label("--> " + item.name + " €" + item.price))));
         container = new BeanItemContainer<>(Item.class
                 , itemResource.getItems().stream()
-                                            .sorted((item1,item2)->item1.getName().compareToIgnoreCase(item2.getName()))
-                                            .collect(Collectors.toList()));
+                .sorted((item1, item2) -> item1.getName().compareToIgnoreCase(item2.getName()))
+                .collect(Collectors.toList()));
         grid.setColumns("name", "description", "price", "amountOfStock");
-
         grid.setContainerDataSource(container);
         grid.setSizeUndefined();
         grid.setSizeFull();
+
+        //https://github.com/stevendecock/vaadinbooking
+        grid.addSelectionListener(event -> {
+            itemSelected = (Item) event.getSelected().iterator().next();
+        });
+
         mainLayout.addComponent(grid);
-    }
-
-    private void addEditButton() {
-
     }
 
     @Override
