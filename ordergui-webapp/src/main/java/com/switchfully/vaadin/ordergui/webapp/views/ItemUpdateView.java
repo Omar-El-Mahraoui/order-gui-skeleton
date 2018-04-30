@@ -50,7 +50,7 @@ public class ItemUpdateView extends com.vaadin.ui.CustomComponent implements Vie
         mainLayout.setMargin(true);
         mainLayout.setDefaultComponentAlignment(Alignment.MIDDLE_CENTER);
         setCompositionRoot(mainLayout);
-        itemBeanFieldGroup = BeanFieldGroup.bindFieldsBuffered(itemToUpdate, this);
+
     }
 
     private void init(String itemId) {
@@ -59,7 +59,8 @@ public class ItemUpdateView extends com.vaadin.ui.CustomComponent implements Vie
                 .filter(item -> item.getId().equals(itemId))
                 .findFirst()
                 .get();
-
+        itemBeanFieldGroup = new BeanFieldGroup<>(Item.class);
+        itemBeanFieldGroup.setItemDataSource(itemToUpdate);
         addNavigationBar();
         addHeader(itemId);
         addNameForm();
@@ -104,6 +105,7 @@ public class ItemUpdateView extends com.vaadin.ui.CustomComponent implements Vie
         name.setRequired(true);
         name.setNullRepresentation("");
         name.addValidator(new TextFieldNameValidator());
+        itemBeanFieldGroup.buildAndBind("name");
         mainLayout.addComponents(name);
     }
 
@@ -117,6 +119,7 @@ public class ItemUpdateView extends com.vaadin.ui.CustomComponent implements Vie
         description.setRequired(true);
         description.setNullRepresentation("");
         description.addValidator(new TextFieldDescriptionValidator());
+        itemBeanFieldGroup.buildAndBind("description");
         mainLayout.addComponents(description);
     }
 
@@ -143,7 +146,7 @@ public class ItemUpdateView extends com.vaadin.ui.CustomComponent implements Vie
         price.setNullRepresentation("");
         price.setRequired(true);
         price.addValidator(new TextFieldPriceValidator());
-
+        itemBeanFieldGroup.buildAndBind("price");
         priceLayout.addComponents(price);
         return priceLayout;
     }
@@ -158,6 +161,7 @@ public class ItemUpdateView extends com.vaadin.ui.CustomComponent implements Vie
         amountOfStock.setRequired(true);
         amountOfStock.setImmediate(true);
         amountOfStock.addValidator(new TextFieldAMountOfStockValidator());
+        itemBeanFieldGroup.buildAndBind("amountOfStock");
         amountOfStockLayout.addComponents(amountOfStock);
         return amountOfStockLayout;
     }
