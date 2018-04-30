@@ -41,6 +41,10 @@ public class UpdateItemForm extends CustomComponent {
     private void init() {
         this.binder = new BeanFieldGroup<>(Item.class);
         binder.setItemDataSource(itemToUpdate);
+        binder.bind(name, "name");
+        binder.bind(description, "description");
+        binder.bind(price, "price");
+        binder.bind(amountOfStock, "amountOfStock");
 
         addNavigationBar();
         addHeader(itemToUpdate.getId());
@@ -51,10 +55,6 @@ public class UpdateItemForm extends CustomComponent {
         addPriceAndAmountOfStockForm();
         fillInPriceAndAmountOfStockForm();
 
-        binder.bind(name, "name");
-        binder.bind(description, "description");
-        binder.bind(price, "price");
-        binder.bind(amountOfStock, "amountOfStock");
     }
 
     private void addNavigationBar() {
