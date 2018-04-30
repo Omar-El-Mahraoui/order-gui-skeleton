@@ -1,9 +1,9 @@
 package com.switchfully.vaadin.ordergui.webapp;
 
 import com.switchfully.vaadin.ordergui.interfaces.items.ItemResource;
-import com.switchfully.vaadin.ordergui.webapp.views.ItemCreateView;
-import com.switchfully.vaadin.ordergui.webapp.views.ItemOverviewView;
-import com.switchfully.vaadin.ordergui.webapp.views.ItemUpdateView;
+import com.switchfully.vaadin.ordergui.webapp.views.item_create_view.ItemCreateView;
+import com.switchfully.vaadin.ordergui.webapp.views.item_overview_view.ItemOverviewView;
+import com.switchfully.vaadin.ordergui.webapp.views.item_update_view.ItemUpdateView;
 import com.vaadin.annotations.Theme;
 import com.vaadin.navigator.Navigator;
 import com.vaadin.server.VaadinRequest;

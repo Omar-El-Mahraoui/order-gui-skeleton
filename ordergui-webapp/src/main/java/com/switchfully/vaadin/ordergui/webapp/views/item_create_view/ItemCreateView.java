@@ -1,4 +1,4 @@
-package com.switchfully.vaadin.ordergui.webapp.views;
+package com.switchfully.vaadin.ordergui.webapp.views.item_create_view;
 
 import com.switchfully.vaadin.ordergui.interfaces.items.Item;
 import com.switchfully.vaadin.ordergui.interfaces.items.ItemResource;
@@ -23,7 +23,9 @@ import java.util.stream.Collectors;
 // and switchfully repositories
 // and book of vaadin
 
-public class ItemUpdateView extends com.vaadin.ui.CustomComponent implements View {
+public class ItemCreateView extends CustomComponent implements View {
+
+    private Item itemToCreate = new Item();
     private final VerticalLayout mainLayout;
     private ItemResource itemResource;
     private Label labelHeader;
@@ -37,39 +39,30 @@ public class ItemUpdateView extends com.vaadin.ui.CustomComponent implements Vie
     private TextField price = new TextField("Price");
     private VerticalLayout amountOfStockLayout;
     private TextField amountOfStock = new TextField("Amount of Stock");
-    private Button buttonUpdate;
+    private Button buttonCreate;
     private Button buttonCancel;
     private BeanFieldGroup<Item> itemBeanFieldGroup;
-    private Item itemToUpdate = new Item();
 
     @Autowired
-    public ItemUpdateView(ItemResource itemResource) {
+    public ItemCreateView(ItemResource itemResource) {
         this.itemResource = itemResource;
         mainLayout = new VerticalLayout();
         mainLayout.removeAllComponents();
         mainLayout.setMargin(true);
         mainLayout.setDefaultComponentAlignment(Alignment.MIDDLE_CENTER);
         setCompositionRoot(mainLayout);
-
+        itemBeanFieldGroup = BeanFieldGroup.bindFieldsBuffered(itemToCreate, this);
     }
 
-    private void init(String itemId) {
+    private void init() {
         mainLayout.removeAllComponents();
-        itemToUpdate = itemResource.getItems().stream()
-                .filter(item -> item.getId().equals(itemId))
-                .findFirst()
-                .get();
-        itemBeanFieldGroup = new BeanFieldGroup<>(Item.class);
-        itemBeanFieldGroup.setItemDataSource(itemToUpdate);
+
         addNavigationBar();
-        addHeader(itemId);
+        addHeader();
         addNameForm();
-        fillInNameForm();
         addDescriptionForm();
-        fillInDescriptionForm();
         addPriceAndAmountOfStockForm();
-        fillInPriceAndAmountOfStockForm();
-        addUpdateAndCancelButtons();
+        addCreateAndCancelButtons();
     }
 
     private void addNavigationBar() {
@@ -79,10 +72,10 @@ public class ItemUpdateView extends com.vaadin.ui.CustomComponent implements Vie
 
         Map<String, String> navigationOptions = new HashMap<>();
         navigationOptions.put("Search item", OrderGUI.VIEW_ITEM_OVERVIEW);
-        navigationOptions.put("Create item", OrderGUI.CREATE_ITEM);
+        navigationOptions.put("Update item", OrderGUI.UPDATE_ITEM);
 
         comboBoxItems.addItems("Search item");
-        comboBoxItems.addItems("Create item");
+        comboBoxItems.addItems("Update item");
         //http://zetcode.com/vaadin/combobox/
         comboBoxItems.addValueChangeListener(event -> {
             String item = event.getProperty().getValue().toString();
@@ -93,8 +86,8 @@ public class ItemUpdateView extends com.vaadin.ui.CustomComponent implements Vie
         mainLayout.addComponent(navigationBar);
     }
 
-    private void addHeader(String itemId) {
-        labelHeader = new Label("Update Item: " + itemId);
+    private void addHeader() {
+        labelHeader = new Label("New Item");
         labelHeader.setStyleName(ValoTheme.LABEL_H1);
         mainLayout.addComponent(labelHeader);
     }
@@ -105,12 +98,7 @@ public class ItemUpdateView extends com.vaadin.ui.CustomComponent implements Vie
         name.setRequired(true);
         name.setNullRepresentation("");
         name.addValidator(new TextFieldNameValidator());
-        itemBeanFieldGroup.buildAndBind("name");
         mainLayout.addComponents(name);
-    }
-
-    private void fillInNameForm() {
-        name.setValue(itemToUpdate.getName());
     }
 
     private void addDescriptionForm() {
@@ -119,12 +107,7 @@ public class ItemUpdateView extends com.vaadin.ui.CustomComponent implements Vie
         description.setRequired(true);
         description.setNullRepresentation("");
         description.addValidator(new TextFieldDescriptionValidator());
-        itemBeanFieldGroup.buildAndBind("description");
         mainLayout.addComponents(description);
-    }
-
-    private void fillInDescriptionForm() {
-        description.setValue(itemToUpdate.getDescription());
     }
 
     private void addPriceAndAmountOfStockForm() {
@@ -135,24 +118,15 @@ public class ItemUpdateView extends com.vaadin.ui.CustomComponent implements Vie
         mainLayout.addComponents(priceAndAmountOfStockLayout);
     }
 
-    private void fillInPriceAndAmountOfStockForm() {
-        fillInPriceForm();
-        fillInAmountOfStockForm();
-    }
-
     private Component addPriceForm() {
         priceLayout = new VerticalLayout();
 
         price.setNullRepresentation("");
         price.setRequired(true);
         price.addValidator(new TextFieldPriceValidator());
-        itemBeanFieldGroup.buildAndBind("price");
+
         priceLayout.addComponents(price);
         return priceLayout;
-    }
-
-    private void fillInPriceForm() {
-        price.setValue(itemToUpdate.getPrice().toString());
     }
 
     private Component addAmountOfStockForm() {
@@ -161,24 +135,21 @@ public class ItemUpdateView extends com.vaadin.ui.CustomComponent implements Vie
         amountOfStock.setRequired(true);
         amountOfStock.setImmediate(true);
         amountOfStock.addValidator(new TextFieldAMountOfStockValidator());
-        itemBeanFieldGroup.buildAndBind("amountOfStock");
         amountOfStockLayout.addComponents(amountOfStock);
         return amountOfStockLayout;
     }
 
-    private void fillInAmountOfStockForm() {
-        amountOfStock.setValue(itemToUpdate.getAmountOfStock().toString());
-    }
-
-    private void addUpdateAndCancelButtons() {
+    private void addCreateAndCancelButtons() {
         HorizontalLayout horizontalLayoutCreateAndCancelButtons = new HorizontalLayout();
         horizontalLayoutCreateAndCancelButtons.setSpacing(true);
         horizontalLayoutCreateAndCancelButtons.setMargin(true);
 
-        buttonUpdate = new Button("Update");
-        buttonUpdate.setStyleName(ValoTheme.BUTTON_PRIMARY);
-        buttonUpdate.addClickListener(event -> {
-            update();
+        buttonCreate = new Button("Create");
+        buttonCreate.setStyleName(ValoTheme.BUTTON_PRIMARY);
+        buttonCreate.addClickListener(event -> save());
+
+        buttonCancel = new Button("Cancel");
+        buttonCancel.addClickListener(event -> {
             getUI().getNavigator().navigateTo(OrderGUI.VIEW_ITEM_OVERVIEW);
             name.clear();
             description.clear();
@@ -186,40 +157,32 @@ public class ItemUpdateView extends com.vaadin.ui.CustomComponent implements Vie
             amountOfStock.clear();
         });
 
-        buttonCancel = new Button("Cancel");
-        buttonCancel.addClickListener(event -> {
-            getUI().getNavigator().navigateTo(OrderGUI.VIEW_ITEM_OVERVIEW);
-//            name.clear();
-//            description.clear();
-//            price.clear();
-//            amountOfStock.clear();
-        });
 
-
-        horizontalLayoutCreateAndCancelButtons.addComponents(buttonUpdate, buttonCancel);
+        horizontalLayoutCreateAndCancelButtons.addComponents(buttonCreate, buttonCancel);
 
         mainLayout.addComponents(horizontalLayoutCreateAndCancelButtons);
     }
 
     //https://github.com/stevendecock/vaadinbooking
-    private void update() {
+    private void save() {
         try {
             itemBeanFieldGroup.commit();
-            itemResource.updateItem(itemToUpdate.getId(), itemToUpdate);
+            itemResource.createItem(itemToCreate);
+            getUI().getNavigator().navigateTo(OrderGUI.VIEW_ITEM_OVERVIEW);
         } catch (FieldGroup.CommitException e) {
             // https://coderwall.com/p/im4lja/joining-objects-into-a-string-with-java-8-stream-api
             Notification.show("Cannot create item: \n- "
                             + e.getInvalidFields().values().stream()
+                            //from colleague
+                            .filter(e1 -> !e1.getMessage().isEmpty())
                             .map(e1 -> e1.getMessage())
                             .collect(Collectors.joining("\n- "))
                     , Notification.Type.WARNING_MESSAGE);
         }
     }
 
-    //https://github.com/stevendecock/vaadinbooking
     @Override
     public void enter(ViewChangeListener.ViewChangeEvent event) {
-        String itemId = event.getParameters();
-        init(itemId);
+        init();
     }
 }

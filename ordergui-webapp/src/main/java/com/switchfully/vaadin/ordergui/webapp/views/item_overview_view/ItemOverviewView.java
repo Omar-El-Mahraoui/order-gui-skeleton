@@ -1,4 +1,4 @@
-package com.switchfully.vaadin.ordergui.webapp.views;
+package com.switchfully.vaadin.ordergui.webapp.views.item_overview_view;
 
 import com.switchfully.vaadin.ordergui.interfaces.items.Item;
 import com.switchfully.vaadin.ordergui.interfaces.items.ItemResource;
@@ -19,26 +19,18 @@ import java.util.stream.Collectors;
 // and switchfully repositories
 // and book of vaadin
 
-public class ItemOverviewView extends com.vaadin.ui.CustomComponent implements View {
+public class ItemOverviewView extends CustomComponent implements View {
 
-    private Grid grid;
-    private VerticalLayout mainLayout;
+    private Grid grid = new Grid();
+    private VerticalLayout mainLayout = new VerticalLayout();
     private ItemResource itemResource;
     private BeanItemContainer<Item> container;
-    private HorizontalLayout header;
-    private Label labelItems;
-    private TextField filterField;
-    private Button buttonClearFilter;
-    private Button buttonNewItem;
-    private Button buttonUpdateItem;
     private Item itemSelected;
 
     @Autowired
     public ItemOverviewView(ItemResource itemResource) {
         this.itemResource = itemResource;
-        this.grid = new Grid();
         grid.setSizeFull();
-        mainLayout = new VerticalLayout();
         mainLayout.setMargin(true);
         mainLayout.setSizeFull();
         mainLayout.setDefaultComponentAlignment(Alignment.MIDDLE_CENTER);
@@ -47,6 +39,11 @@ public class ItemOverviewView extends com.vaadin.ui.CustomComponent implements V
 
     private void init() {
         mainLayout.removeAllComponents();
+        container = new BeanItemContainer<>(Item.class
+                , itemResource.getItems().stream()
+                .sorted((item1, item2) -> item1.getName().compareToIgnoreCase(item2.getName()))
+                .collect(Collectors.toList()));
+
         addNavigationBar();
         addHeader();
         renderItems();
@@ -75,14 +72,14 @@ public class ItemOverviewView extends com.vaadin.ui.CustomComponent implements V
     }
 
     private void addHeader() {
-        header = new HorizontalLayout();
+        HorizontalLayout header = new HorizontalLayout();
         header.setSizeFull();
         header.setMargin(true);
 
-        labelItems = new Label("ITEMS:");
+        Label labelItems = new Label("ITEMS:");
         labelItems.setStyleName(ValoTheme.LABEL_H1);
 
-        filterField = new TextField();
+        TextField filterField = new TextField();
         filterField.setInputPrompt("Filter by name");
         filterField.setSizeFull();
         filterField.addTextChangeListener(event -> {
@@ -92,18 +89,18 @@ public class ItemOverviewView extends com.vaadin.ui.CustomComponent implements V
 
         });
 
-        buttonClearFilter = new Button("X");
+        Button buttonClearFilter = new Button("X");
         buttonClearFilter.setStyleName(ValoTheme.BUTTON_PRIMARY);
         buttonClearFilter.addClickListener(event -> {
             container.removeAllContainerFilters();
             filterField.clear();
         });
 
-        buttonNewItem = new Button("New Item");
+        Button buttonNewItem = new Button("New Item");
         buttonNewItem.setStyleName(ValoTheme.BUTTON_FRIENDLY);
         buttonNewItem.addClickListener(event -> getUI().getNavigator().navigateTo(OrderGUI.CREATE_ITEM));
 
-        buttonUpdateItem = new Button("Update Item");
+        Button buttonUpdateItem = new Button("Update Item");
         buttonUpdateItem.setStyleName(ValoTheme.BUTTON_FRIENDLY);
         buttonUpdateItem.addClickListener(event -> {
             if (itemSelected != null) {
@@ -116,10 +113,6 @@ public class ItemOverviewView extends com.vaadin.ui.CustomComponent implements V
     }
 
     private void renderItems() {
-        container = new BeanItemContainer<>(Item.class
-                , itemResource.getItems().stream()
-                .sorted((item1, item2) -> item1.getName().compareToIgnoreCase(item2.getName()))
-                .collect(Collectors.toList()));
         grid.setColumns("name", "description", "price", "amountOfStock");
         grid.setContainerDataSource(container);
         grid.setSizeUndefined();
@@ -127,7 +120,11 @@ public class ItemOverviewView extends com.vaadin.ui.CustomComponent implements V
 
         //https://github.com/stevendecock/vaadinbooking
         grid.addSelectionListener(event -> {
-            itemSelected = (Item) event.getSelected().iterator().next();
+            try {
+                itemSelected = (Item) event.getSelected().iterator().next();
+            } catch (Exception e) {
+                //e.printStackTrace();
+            }
         });
 
         mainLayout.addComponent(grid);
