@@ -44,40 +44,45 @@ public class ItemOverviewView extends CustomComponent implements View {
                 .sorted((item1, item2) -> item1.getName().compareToIgnoreCase(item2.getName()))
                 .collect(Collectors.toList()));
 
-        addNavigationBar();
+        //addNavigationBar();
         addHeader();
         renderItems();
     }
 
 
-    private void addNavigationBar() {
-        HorizontalLayout navigationBar = new HorizontalLayout();
-        ComboBox comboBoxItems = new ComboBox("");
-        comboBoxItems.setNullSelectionAllowed(false);
-
-        Map<String, String> navigationOptions = new HashMap<>();
-        navigationOptions.put("Create Item", OrderGUI.CREATE_ITEM);
-        navigationOptions.put("Update Item", OrderGUI.UPDATE_ITEM);
-
-        comboBoxItems.addItems("Create Item");
-        comboBoxItems.addItems("Update Item");
-        //http://zetcode.com/vaadin/combobox/
-        comboBoxItems.addValueChangeListener(event -> {
-            String item = event.getProperty().getValue().toString();
-            getUI().getNavigator().navigateTo(navigationOptions.get(item));
-        });
-
-        navigationBar.addComponents(comboBoxItems);
-        mainLayout.addComponent(navigationBar);
-    }
+//    private void addNavigationBar() {
+//        HorizontalLayout navigationBar = new HorizontalLayout();
+//        ComboBox comboBoxItems = new ComboBox("");
+//        comboBoxItems.setNullSelectionAllowed(false);
+//
+//        Map<String, String> navigationOptions = new HashMap<>();
+//        navigationOptions.put("Create Item", OrderGUI.CREATE_ITEM);
+//        navigationOptions.put("Update Item", OrderGUI.UPDATE_ITEM);
+//
+//        comboBoxItems.addItems("Create Item");
+//        comboBoxItems.addItems("Update Item");
+//        //http://zetcode.com/vaadin/combobox/
+//        comboBoxItems.addValueChangeListener(event -> {
+//            String item = event.getProperty().getValue().toString();
+//            getUI().getNavigator().navigateTo(navigationOptions.get(item));
+//        });
+//
+//        navigationBar.addComponents(comboBoxItems);
+//        mainLayout.addComponent(navigationBar);
+//    }
 
     private void addHeader() {
-        HorizontalLayout header = new HorizontalLayout();
+        VerticalLayout header = new VerticalLayout();
         header.setSizeFull();
         header.setMargin(true);
 
-        Label labelItems = new Label("ITEMS:");
-        labelItems.setStyleName(ValoTheme.LABEL_H1);
+        Label title = new Label("Items");
+        title.setStyleName(ValoTheme.LABEL_H1);
+
+        HorizontalLayout filterAndButtonsAtTopOfPage = new HorizontalLayout();
+        filterAndButtonsAtTopOfPage.setDefaultComponentAlignment(Alignment.TOP_LEFT);
+        filterAndButtonsAtTopOfPage.setSizeFull();
+        filterAndButtonsAtTopOfPage.setMargin(true);
 
         TextField filterField = new TextField();
         filterField.setInputPrompt("Filter by name");
@@ -108,7 +113,8 @@ public class ItemOverviewView extends CustomComponent implements View {
             }
         });
 
-        header.addComponents(labelItems, filterField, buttonClearFilter, buttonNewItem, buttonUpdateItem);
+        filterAndButtonsAtTopOfPage.addComponents(filterField, buttonClearFilter, buttonNewItem, buttonUpdateItem);
+        header.addComponents(title, filterAndButtonsAtTopOfPage);
         mainLayout.addComponent(header);
     }
 

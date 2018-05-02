@@ -72,13 +72,13 @@ public class ItemUpdateView extends CustomComponent implements View {
             itemResource.updateItem(itemToUpdate.getId(), itemToUpdate);
         } catch (FieldGroup.CommitException e) {
             // https://coderwall.com/p/im4lja/joining-objects-into-a-string-with-java-8-stream-api
-            Notification.show("Cannot create item: \n- "
+            Notification.show("Cannot update item: \n- "
                             + e.getInvalidFields().values().stream()
                             //from colleague
                             .filter(e1 -> !e1.getMessage().isEmpty())
                             .map(e1 -> e1.getMessage())
                             .collect(Collectors.joining("\n- "))
-                    , Notification.Type.WARNING_MESSAGE);
+                    , Notification.Type.ERROR_MESSAGE);
         }
     }
 
